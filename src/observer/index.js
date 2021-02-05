@@ -36,7 +36,7 @@ function defineReactive(data, key, value) {
     observe(value) // value是对象，递归劫持
     Object.defineProperty(data, key, {
         get() {
-            console.log('get --' + value)
+            // console.log('get --' + value)
             return value
         },
         set(newV) {
