@@ -7,17 +7,48 @@ const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s
 const startTagClose = /^\s*(\/?)>/; //     />   <div/>
 const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g; // {{aaaaa}}
 
+// 在模板编译中，把html =>  词法解析（vue2中用的正则） => （开始标签 ， 结束标签，属性，文本） => ast语法树（用的栈型结构）
+let root = null;
+let stack = [];
 function parserHTML(html) {
+    function createAstElement(tagName, attrs) {
+        return {
+            tag: tagName,
+            tagType: 1,
+            parent: null,
+            children: [],
+            attrs
+        }
+    }
     function start(tagName, attributes) {
-        console.log('start-', tagName, attributes)
+        let parent = stack[stack.length - 1];
+        let element = createAstElement(tagName, attributes);
+        if (!root) {
+            root = element;
+        }
+        element.parent = parent;
+        if (parent) {
+            parent.children.push(element);
+        }
+        stack.push(element);
     }
 
     function end(tagName) {
-        console.log('end-', tagName)
+        let last = stack.pop();
+        if (last.tag !== tagName){
+            throw new Error('标签闭合有误')
+        }
     }
 
     function chars(text) {
-        console.log('text', text)
+        text = text.replace(/\s/g, "");
+        let parent = stack[stack.length - 1];
+        if (text) {
+            parent.children.push({
+                tagType: 3,
+                text
+            })
+        }
     }
 
     function advance(len) {
@@ -82,6 +113,8 @@ function parserHTML(html) {
             advance(text.length);
         }
     }
+    console.log('root', root);
+    return root;
 }
 
 
