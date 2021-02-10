@@ -1,13 +1,16 @@
 import {
     isObject
 } from "../util";
-import { arrayMethods } from "./array";
+import {
+    arrayMethods
+} from "./array";
+import Dep from "./dep";
 
 class Observer {
     constructor(data) {
         // data.__ob__ = this; // 把Observer的实例放到data下面，可以在数据的方法里调用Observer的方法
         Object.defineProperty(data, '__ob__', { // 不可枚举，避免循环。。。。爆栈
-            value:this,
+            value: this,
             enumerable: false
         })
         // 数组也可以通过defineProperty对下标进行劫持，但是性能消耗严重，也没有必要
@@ -20,7 +23,7 @@ class Observer {
             this.walk(data)
         }
     }
-    observeArray(data){
+    observeArray(data) {
         data.forEach(item => {
             observe(item);
         })
@@ -34,14 +37,21 @@ class Observer {
 
 function defineReactive(data, key, value) {
     observe(value) // value是对象，递归劫持
+    let dep = new Dep(); // 每个属性有一个dep
     Object.defineProperty(data, key, {
         get() {
             // console.log('get --' + value)
+            if (Dep.target) { // 模板中取值
+                dep.depend(); // 让dep记住watcher
+            }
             return value
         },
         set(newV) {
-            observe(newV) // 赋值的新对象，也需要劫持
-            value = newV
+            if (value !== newV) {
+                observe(newV); // 赋值的新对象，也需要劫持
+                value = newV;
+                dep.nodify();
+            }
         }
     })
 }

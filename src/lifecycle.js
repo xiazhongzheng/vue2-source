@@ -1,3 +1,4 @@
+import Watcher from "./observer/watcher";
 import { patch } from "./vdom/patch";
 
 export function lifecycleMixin(Vue) {
@@ -14,5 +15,7 @@ export function mountComponent(vm, el) {
         vm._update(vm._render()); // 后续更新可以调用updateComponent方法
         // 用虚拟dom 生成真实dom
     }
-    updateComponent();
+    new Watcher(wm, updateComponent, () => {
+        console.log('视图更新了')
+    }, true);
 }
