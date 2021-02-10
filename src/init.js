@@ -25,7 +25,7 @@ export function initMixin(Vue) {
         // 把版本转换成  对应的渲染函数 =》 虚拟dom  VNode  =》 diff算法更新虚拟dom =》 产生真实节点  更新
         const vm = this;
         const options = vm.$options;
-        el = vm.el = document.querySelector(el);
+        el = vm.$el = document.querySelector(el);
         if (!options.render) {
             let template = options.template;
             if (!template && el) {

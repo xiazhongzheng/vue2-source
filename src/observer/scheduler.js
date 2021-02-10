@@ -1,6 +1,8 @@
 // 调度中心
 // 做watcher的缓存的，只执行一次watcher的更新
 
+import { nextTick } from "../util";
+
 let queue = [];
 let has = new Set();
 let pending = false; // 只调用一次watcher的更新
@@ -22,7 +24,8 @@ export function queueWatcher(watcher) {
         has.add(id);
         if (!pending) {
             // 只在第一次属性的赋值时调用，但因为是异步，所以在更新时，获取的属性数据仍然是最后一个
-            setTimeout(flushSchedulerQueue, 0);
+            // setTimeout(flushSchedulerQueue, 0);
+            nextTick(flushSchedulerQueue);
             pending = true;
         }
     }

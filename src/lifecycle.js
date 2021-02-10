@@ -1,11 +1,13 @@
 import Watcher from "./observer/watcher";
+import { nextTick } from "./util";
 import { patch } from "./vdom/patch";
 
 export function lifecycleMixin(Vue) {
     Vue.prototype._update = function(vnode) {
         let vm = this;
-        patch(vm.el, vnode);
+        vm.$el = patch(vm.$el, vnode); // 保存新的$el
     }
+    Vue.prototype.$nextTick = nextTick;
 }
 
 export function mountComponent(vm, el) {
@@ -15,7 +17,7 @@ export function mountComponent(vm, el) {
         vm._update(vm._render()); // 后续更新可以调用updateComponent方法
         // 用虚拟dom 生成真实dom
     }
-    new Watcher(wm, updateComponent, () => {
+    new Watcher(vm, updateComponent, () => {
         console.log('视图更新了')
     }, true);
 }

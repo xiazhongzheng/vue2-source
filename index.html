@@ -8,7 +8,7 @@
 </head>
 
 <body>
-    <div id="app" a=1 style="color: red;font-size: 12px;"><span>hello{{name}}world</span>dd</div>
+    <div id="app" a=1 style="color: red;font-size: 12px;"><span>hello{{name}}world</span>{{name}}{{name}}</div>
     <script src="./dist/vue.js"></script>
     <script>
         let vm = new Vue({
@@ -24,7 +24,17 @@
                 }
             },
         })
-        
+        setTimeout(() => {
+            vm.name = 'xiaoqing1';
+            vm.name = 'xiaoqing2';
+            vm.name = 'xiaoqing3';
+            vm.name = 'xiaoqing4';
+            vm.name = 'xiaoqing5';
+            
+            vm.$nextTick(() => {
+                console.log(111)
+            })
+        }, 1000);
         // console.log(vm.arr[0].name)
     </script>
 </body>

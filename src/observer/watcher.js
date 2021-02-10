@@ -15,6 +15,7 @@ class Watcher{
         this.getter = exprOrFn;
         this.deps = [];
         this.depsId = new Set(); // 去重dep
+        this.get()
     }
     get() {
         // 每个属性可能在多个页面中使用，对应多个watcher，

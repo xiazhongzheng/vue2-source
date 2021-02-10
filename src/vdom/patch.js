@@ -4,7 +4,9 @@ export function patch(oldVnode, vnode) {
         let parentEle = oldVnode.parentNode;
         let ele = createEle(vnode);
         parentEle.insertBefore(ele, oldVnode.nextSibling);
-        parentEle.removeChild(oldVnode)
+        parentEle.removeChild(oldVnode);
+        // 返回新的$el
+        return ele
     }
 }
 

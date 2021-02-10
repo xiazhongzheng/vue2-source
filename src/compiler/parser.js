@@ -113,7 +113,6 @@ function parserHTML(html) {
             advance(text.length);
         }
     }
-    console.log('root', root);
     return root;
 }
 export default parserHTML;
