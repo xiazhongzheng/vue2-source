@@ -8,7 +8,7 @@
 </head>
 
 <body>
-    <div id="app" a=1 style="color: red;font-size: 12px;"><span>hello{{name}}world</span>{{name}}{{name}}</div>
+    <div id="app" a=1 style="color: red;font-size: 12px;"><span>hello{{name}}world</span>{{name}}{{name}}--{{arr}}--{{obj}}</div>
     <script src="./dist/vue.js"></script>
     <script>
         let vm = new Vue({
@@ -16,11 +16,8 @@
             data() {
                 return {
                     name: 'xiaoqing',
-                    arr: [
-                        {
-                            name: 'xiaoq'
-                        }
-                    ]
+                    arr: [[1,2,3]],
+                    obj: {a:{a:1}}, // 模板中取对象，用json.stringfy 会取里面的每一个属性
                 }
             },
         })
@@ -30,6 +27,8 @@
             vm.name = 'xiaoqing3';
             vm.name = 'xiaoqing4';
             vm.name = 'xiaoqing5';
+            vm.arr[0].push(456)
+            vm.obj.a.a = 100
             
             vm.$nextTick(() => {
                 console.log(111)

@@ -8,6 +8,7 @@ import Dep from "./dep";
 
 class Observer {
     constructor(data) {
+        this.dep = new Dep();
         // data.__ob__ = this; // 把Observer的实例放到data下面，可以在数据的方法里调用Observer的方法
         Object.defineProperty(data, '__ob__', { // 不可枚举，避免循环。。。。爆栈
             value: this,
@@ -35,14 +36,30 @@ class Observer {
     }
 }
 
+function depandArray(value) {
+    for(var i = 0;i<value.length;i++){
+        let current = value[i];
+        current.__ob__ && current.__ob__.dep.depend();
+        if(Array.isArray(current)) {
+            depandArray(current);
+        }
+    }
+}
+
 function defineReactive(data, key, value) {
-    observe(value) // value是对象，递归劫持
+    let childOb = observe(value) // value是对象，递归劫持
     let dep = new Dep(); // 每个属性有一个dep
     Object.defineProperty(data, key, {
         get() {
             // console.log('get --' + value)
             if (Dep.target) { // 模板中取值
                 dep.depend(); // 让dep记住watcher
+                if(childOb) { // 对象和数组都监听子的，$set
+                    childOb.dep.depend();
+                    if(Array.isArray(value)) { // 针对arr: [[1], [2]]多维数组
+                        depandArray(value);
+                    }
+                }
             }
             return value
         },
@@ -60,7 +77,7 @@ export function observe(data) {
         return;
     }
     if (data.__ob__) { // 已经劫持过的不再劫持
-        return;
+        return data.__ob__;
     }
     return new Observer(data)
 }
