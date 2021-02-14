@@ -8,7 +8,9 @@
 </head>
 
 <body>
-    <div id="app" a=1 style="color: red;font-size: 12px;"><span>hello{{name}}world</span>{{name}}{{name}}--{{arr}}--{{obj}}</div>
+    <div id="app" a=1 style="color: red;font-size: 12px;">
+        <span>hello{{name}}world</span>{{name}}{{name}}--{{arr}}--{{obj}}
+    </div>
     <script src="./dist/vue.js"></script>
     <script>
         let vm = new Vue({
@@ -16,11 +18,27 @@
             data() {
                 return {
                     name: 'xiaoqing',
-                    arr: [[1,2,3]],
-                    obj: {a:{a:1}}, // 模板中取对象，用json.stringfy 会取里面的每一个属性
+                    arr: [[1, 2, 3]],
+                    obj: { a: { a: 1 } }, // 模板中取对象，用json.stringfy 会取里面的每一个属性
                 }
             },
+            watch: {
+                'obj.a.a'(newV, oldV) {
+                    console.log(newV, oldV);
+                },
+                name: [
+                    function (newV, oldV) {
+                        console.log(newV, oldV);
+                    },
+                    function (a, b) {
+                        console.log(a, b);
+                    }
+                ]
+            }
         })
+        vm.$watch('name', function (newV, oldV) {
+            console.log(newV, oldV);
+        },{})
         setTimeout(() => {
             vm.name = 'xiaoqing1';
             vm.name = 'xiaoqing2';
@@ -29,7 +47,7 @@
             vm.name = 'xiaoqing5';
             vm.arr[0].push(456)
             vm.obj.a.a = 100
-            
+
             vm.$nextTick(() => {
                 console.log(111)
             })

@@ -8,7 +8,7 @@ import Dep from "./dep";
 
 class Observer {
     constructor(data) {
-        this.dep = new Dep();
+        this.dep = new Dep(); // 给数组监听子元素用的
         // data.__ob__ = this; // 把Observer的实例放到data下面，可以在数据的方法里调用Observer的方法
         Object.defineProperty(data, '__ob__', { // 不可枚举，避免循环。。。。爆栈
             value: this,
