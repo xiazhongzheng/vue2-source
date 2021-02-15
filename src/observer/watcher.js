@@ -16,6 +16,7 @@ class Watcher {
         this.options = options;
         this.id = id++;
         this.lazy = !!options.lazy; // computed默认不取值
+        this.dirty = !!options.lazy; // computed，用户watcher，默认lazy为true，dirty也为true
 
         // render去VM上取值，再渲染，所以取名getter
         // this.getter = exprOrFn;
@@ -44,13 +45,19 @@ class Watcher {
         // 一个页面有多个属性，对应多个dep
         // 多对多的关系
         pushTarget(this); // Dep.target = watcher; 把当前的watcher放到Dep的=静态属性下面
-        const value = this.getter(); // render方法里，取属性，触发defineProperty的getter，收集watcher
+        const value = this.getter.call(this.vm); // render方法里，取属性，触发defineProperty的getter，收集watcher
+        // 用户watcher中，用户写的get里面会有this，指的是vm上的属性，所以这里getter函数里面的this指向应该是vm，哟所以用call绑定this指向
         popTarget(); // Dep.target = null;
         return value; // this.getter不一定有返回值，这是给用户watcher取值
     }
     update() {
         // this.get(); // 不直接调用get，防止重复，通过调度中心去重
-        queueWatcher(this);
+        if (this.lazy) { // 数据更新时，如果是computed，让dirty为true，重新计算
+            this.dirty = true;
+        } else {
+            // 如果不是computed，更新视图
+            queueWatcher(this);
+        }
     }
     run() {
         let newValue = this.get();
@@ -67,6 +74,16 @@ class Watcher {
             this.deps.push(dep);
             this.depsId.add(id);
             dep.addSub(this); // dep添加watcher的方法放在这，也是去重
+        }
+    }
+    evaluate() {
+        this.dirty = false;
+        this.value = this.get();
+    }
+    depend() {
+        let i = this.deps.length;
+        while(i--){
+            this.deps[i].depend();
         }
     }
 }

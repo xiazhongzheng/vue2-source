@@ -7,6 +7,10 @@
     <title>Document</title>
 </head>
 
+<!-- fullName是计算属性，不在data中，没有对渲染watcher的依赖搜集 -->
+<!-- firstName是在计算属性中使用的，所以firstName搜集了计算属性的watcher，也没有搜集渲染watcher -->
+<!-- 所以应该同时搜集计算属性的watcher和渲染watcher -->
+
 <body>
     <div id="app" a=1 style="color: red;font-size: 12px;">
         <span>hello{{name}}world</span>{{name}}{{name}}--{{arr}}--{{obj}}--{{fullName}}--{{fullName}}
@@ -27,7 +31,7 @@
             computed: {
                 fullName: {
                     get() {
-                        let fullName = this.firstName + this.lastName;
+                        let fullName = this.firstName + '' + this.lastName;
                         console.log('get', fullName);
                         return fullName;
                     },
@@ -65,7 +69,8 @@
             //     console.log(111)
             // })
 
-            vm.lastName = 'lan'
+            vm.lastName = 'lan';
+            console.log(vm.fullName)
         }, 1000);
         // console.log(vm.arr[0].name)
     </script>

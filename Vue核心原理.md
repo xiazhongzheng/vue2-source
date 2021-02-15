@@ -56,8 +56,14 @@
 
 ## Watch & Computed
 
-1. watch的三种写法,1.值是对象、2.值是数组、3.值是字符串 （如果是对象可以传入一些watch参数），最终会调用vm.$watch来实现
-2. 所以在原型上统一用$watch方法实现，在对watch初始化的时候，只对watch的不同写法做判断，统一到$watch既可
-3. $watch中调用Watcher类，把Watcher类改造一下，exprOrFn适合函数和表达式的情况，同时标记为options.user = true;
-4. 在Watcher类初始化的时候，this.getter在exprOrFn是字符串的时候，赋值为一个函数，返回vm中该字符对应的属性值，这样既可以触发属性的get，让属性的dep搜集当前用户watcher，也可以当做新值提供给用户的回调。
+- Watch
+  1. watch的三种写法,1.值是对象、2.值是数组、3.值是字符串 （如果是对象可以传入一些watch参数），最终会调用vm.$watch来实现
+  2. 所以在原型上统一用$watch方法实现，在对watch初始化的时候，只对watch的不同写法做判断，统一到$watch既可
+  3. $watch中调用Watcher类，把Watcher类改造一下，exprOrFn适合函数和表达式的情况，同时标记为options.user = true;
+  4. 在Watcher类初始化的时候，this.getter在exprOrFn是字符串的时候，赋值为一个函数，返回vm中该字符对应的属性值，这样既可以触发属性的get，让属性的dep搜集当前用户watcher，也可以当做新值提供给用户的回调。
 
+- Computed
+  1. 每个计算属性也都是一个`watcher`,计算属性需要表示lazy:true,这样在初始化watcher时不会立即调用计算属性方法
+  2. 默认计算属性需要保存一个dirty属性，用来实现缓存功能
+  3. 当依赖的属性变化时，会通知watcher调用update方法，此时我们将dirty置换为true。这样再取值时会重新进行计算。
+  4. 如果计算属性在模板中使用，就让计算属性中依赖的数据也记录渲染watcher,这样依赖的属性发生变化也可以让视图进行刷新（所以dep和watcher是多对多的关系，一个dep中也是用栈型结构保存watcher，当取完计算属性，还有Dep.target的时候，就是渲染watcher，需要再调用watcher的一个方法，将计算watcher依赖的属性的dep，依次都收集渲染watcher）

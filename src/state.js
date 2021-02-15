@@ -1,6 +1,7 @@
 import {
     observe
 } from "./observer";
+import Dep from "./observer/dep";
 import Watcher from "./observer/watcher";
 import {
     isFunction
@@ -33,16 +34,35 @@ export function initState(vm) {
 }
 
 function initComputed(vm, computed) {
+    const watchers = vm._computedWatchers = {};
+    // vm上的_computedWatchers属性，保存watcher和computed的映射关系
     for (const key in computed) {
         if (Object.hasOwnProperty.call(computed, key)) {
             const userDef = computed[key];
             // 用户定义的可能是函数，也可能是对象（包含get和set）
             let getter = typeof userDef === 'function' ? userDef : userDef.get;
-            // new Watcher(vm, getter, () => {}, {
-            //     lazy: true
-            // }); // computed默认不取值
+            watchers[key] = new Watcher(vm, getter, () => {}, {
+                lazy: true
+            }); // computed默认不取值
             defineComputed(vm, key, userDef);
         }
+    }
+}
+
+function createComputedGetter(key) {
+    return function computedGetter() {
+        // vm.key 调用属性的get，所以this指向vm
+        let watcher = this._computedWatchers[key];
+        if (watcher.dirty) {
+            watcher.evaluate();
+        }
+        // 如果Dep.target还有值 说明需要继续向上收集
+        if (Dep.target) { // 当前Dep.target是渲染watcher
+            // 计算属性watcher 内部 有两个dep  firstName,lastName
+            // 两个dep都需要再收集渲染watcher
+            watcher.depend(); // watcher 里 对应了 多个dep
+        }
+        return watcher.value;
     }
 }
 
@@ -52,7 +72,7 @@ function defineComputed(vm, key, userDef) {
     if (typeof userDef === 'function') {
         sharedProperty.get = userDef;
     } else {
-        sharedProperty.get = userDef.get;
+        sharedProperty.get = createComputedGetter(key);
         sharedProperty.set = userDef.set;
     }
     // computed属性就是用defineProperty把新属性代理到vm上

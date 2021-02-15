@@ -20,10 +20,14 @@ class Dep {
     }
 }
 
+let stack = []; // 一个dep中放多个watcher
+
 export function pushTarget(watcher) {
     Dep.target = watcher;
+    stack.push(watcher);
 }
 export function popTarget() {
-    Dep.target = null;
+    stack.pop();
+    Dep.target = stack[stack.length - 1];
 }
 export default Dep;
