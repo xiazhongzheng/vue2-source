@@ -17,8 +17,27 @@
     </div>
     <script src="./dist/vue.js"></script>
     <script>
+        Vue.mixin({
+            beforeCreate() {
+                console.log('before create1')
+            }
+        })
+        Vue.mixin({
+            beforeCreate() {
+                console.log('before create2')
+            }
+        })
         let vm = new Vue({
             el: '#app',
+            beforeCreate() {
+                console.log('beforeCreate', 'parent')
+            },
+            created() {
+                console.log('created', 'parent')
+            },
+            mounted() {
+                console.log('mounted', 'parent')
+            },
             data() {
                 return {
                     name: 'xiaoqing',
@@ -40,23 +59,24 @@
                     }
                 }
             },
-            // watch: {
-            //     'obj.a.a'(newV, oldV) {
-            //         console.log(newV, oldV);
-            //     },
-            //     name: [
-            //         function (newV, oldV) {
-            //             console.log(newV, oldV);
-            //         },
-            //         function (a, b) {
-            //             console.log(a, b);
-            //         }
-            //     ]
-            // }
+            watch: {
+                'obj.a.a'(newV, oldV) {
+                    console.log(newV, oldV);
+                },
+                name: [
+                    function (newV, oldV) {
+                        console.log(newV, oldV);
+                    },
+                    function (a, b) {
+                        console.log(a, b);
+                    }
+                ]
+            }
         })
         // vm.$watch('name', function (newV, oldV) {
         //     console.log(newV, oldV);
         // },{})
+        console.log('Vue.options', Vue.options)
         setTimeout(() => {
             // vm.name = 'xiaoqing1';
             // vm.name = 'xiaoqing2';

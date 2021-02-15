@@ -56,3 +56,71 @@ export function nextTick(cb) {
         waiting = true;
     }
 }
+const liftCycleHooks = [
+    'beforeCreate',
+    'created',
+    'beforeMount',
+    'mounted',
+    'beforeUpdate',
+    'updated',
+    'beforeDistroy',
+    'distroyed',
+]
+
+const strats = {};
+
+function mergeHook(parentVal, childVal) {
+    if (childVal) {
+        if (parentVal) {
+            // concat可以连接数组也可以添加一个元素
+            return parentVal.concat(childVal);
+        } else {
+            // childVal的写法可以是一个函数，也可以是一个数组
+            return Array.isArray(childVal) ? childVal : [childVal];
+        }
+    } else {
+        return parentVal; // parentVal已经转成数组
+    }
+}
+
+liftCycleHooks.forEach(hook => {
+    strats[hook] = mergeHook;
+});
+
+export function mergeOptions(parent, child) {
+    const options = {};
+    for (const key in parent) {
+        if (Object.hasOwnProperty.call(parent, key)) {
+            mergeField(key)
+        }
+    }
+    for (const key in child) {
+        if (Object.hasOwnProperty.call(child, key)) {
+            if (parent.hasOwnProperty(key)) {
+                continue;
+            }
+            mergeField(key);
+        }
+    }
+
+    function mergeField(key) {
+        let parentVal = parent[key];
+        let childVal = child[key];
+        if (strats[key]) {
+            // 策略模式
+            options[key] = strats[key](parentVal, childVal);
+        } else {
+            if (isObject(parentVal) && isObject(childVal)) {
+                // 如果合并的内容是对象，则进行对象的合并
+                options[key] = {
+                    ...parentVal,
+                    ...childVal
+                }
+            } else {
+                // 如果是普通值，则直接替换
+                options[key] = childVal;
+            }
+        }
+    }
+    return options;
+}

@@ -17,7 +17,17 @@ export function mountComponent(vm, el) {
         vm._update(vm._render()); // 后续更新可以调用updateComponent方法
         // 用虚拟dom 生成真实dom
     }
+    callHooks(vm, 'beforeMount');
     new Watcher(vm, updateComponent, () => {
         console.log('视图更新了')
     }, true);
+}
+
+export function callHooks(vm, hook) {
+    let handles = vm.$options[hook];
+    if (handles) {
+        handles.forEach(handle => {
+            handle.call(vm);
+        });
+    }
 }
