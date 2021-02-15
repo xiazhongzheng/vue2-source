@@ -67,3 +67,10 @@
   2. 默认计算属性需要保存一个dirty属性，用来实现缓存功能
   3. 当依赖的属性变化时，会通知watcher调用update方法，此时我们将dirty置换为true。这样再取值时会重新进行计算。
   4. 如果计算属性在模板中使用，就让计算属性中依赖的数据也记录渲染watcher,这样依赖的属性发生变化也可以让视图进行刷新（所以dep和watcher是多对多的关系，一个dep中也是用栈型结构保存watcher，当取完计算属性，还有Dep.target的时候，就是渲染watcher，需要再调用watcher的一个方法，将计算watcher依赖的属性的dep，依次都收集渲染watcher）
+
+# 生命周期的合并
+
+1. Mixin原理：在`init`时，调用`initGlobalApi`方法，在Vue类上添加`mixin`静态方法，调用`mergeOptions`方法合并Vue上原有的options和当前添加的options
+2. 合并生命周期：`mergeOptions`方法分别遍历parent和child的options，并用策略模式合并不用的属性。对于生命周期是用数组合并到一起，其他的data、methods等，是直接用拓展运算符把对象合并，所以有重复的会覆盖。
+3. 调用生命周期：`callHook`方法，遍历当前生命周期的数组，依次执行
+4. 初始化流程中调用生命周期：初始化`initState`之前调用`beforeCreate`，初始化之后调用`created`。
