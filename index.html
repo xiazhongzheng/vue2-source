@@ -9,7 +9,7 @@
 
 <body>
     <div id="app" a=1 style="color: red;font-size: 12px;">
-        <span>hello{{name}}world</span>{{name}}{{name}}--{{arr}}--{{obj}}
+        <span>hello{{name}}world</span>{{name}}{{name}}--{{arr}}--{{obj}}--{{fullName}}--{{fullName}}
     </div>
     <script src="./dist/vue.js"></script>
     <script>
@@ -20,37 +20,52 @@
                     name: 'xiaoqing',
                     arr: [[1, 2, 3]],
                     obj: { a: { a: 1 } }, // 模板中取对象，用json.stringfy 会取里面的每一个属性
+                    firstName: 'xiao',
+                    lastName: 'qing',
                 }
             },
-            watch: {
-                'obj.a.a'(newV, oldV) {
-                    console.log(newV, oldV);
-                },
-                name: [
-                    function (newV, oldV) {
-                        console.log(newV, oldV);
+            computed: {
+                fullName: {
+                    get() {
+                        let fullName = this.firstName + this.lastName;
+                        console.log('get', fullName);
+                        return fullName;
                     },
-                    function (a, b) {
-                        console.log(a, b);
+                    set(newValue) {
+                        console.log('computed set');
                     }
-                ]
-            }
+                }
+            },
+            // watch: {
+            //     'obj.a.a'(newV, oldV) {
+            //         console.log(newV, oldV);
+            //     },
+            //     name: [
+            //         function (newV, oldV) {
+            //             console.log(newV, oldV);
+            //         },
+            //         function (a, b) {
+            //             console.log(a, b);
+            //         }
+            //     ]
+            // }
         })
-        vm.$watch('name', function (newV, oldV) {
-            console.log(newV, oldV);
-        },{})
+        // vm.$watch('name', function (newV, oldV) {
+        //     console.log(newV, oldV);
+        // },{})
         setTimeout(() => {
-            vm.name = 'xiaoqing1';
-            vm.name = 'xiaoqing2';
-            vm.name = 'xiaoqing3';
-            vm.name = 'xiaoqing4';
-            vm.name = 'xiaoqing5';
-            vm.arr[0].push(456)
-            vm.obj.a.a = 100
+            // vm.name = 'xiaoqing1';
+            // vm.name = 'xiaoqing2';
+            // vm.name = 'xiaoqing3';
+            // vm.name = 'xiaoqing4';
+            // vm.name = 'xiaoqing5';
+            // vm.arr[0].push(456)
+            // vm.obj.a.a = 100
+            // vm.$nextTick(() => {
+            //     console.log(111)
+            // })
 
-            vm.$nextTick(() => {
-                console.log(111)
-            })
+            vm.lastName = 'lan'
         }, 1000);
         // console.log(vm.arr[0].name)
     </script>

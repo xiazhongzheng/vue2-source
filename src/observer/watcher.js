@@ -1,28 +1,34 @@
-import { popTarget, pushTarget } from "./dep";
-import { queueWatcher } from "./scheduler";
+import {
+    popTarget,
+    pushTarget
+} from "./dep";
+import {
+    queueWatcher
+} from "./scheduler";
 
 let id = 0;
 // 一个页面对应一个watcher
-class Watcher{
-    constructor(vm, exprOrFn, cb, options){
+class Watcher {
+    constructor(vm, exprOrFn, cb, options) {
         this.vm = vm;
         this.exprOrFn = exprOrFn;
         this.cb = cb;
         this.options = options;
         this.id = id++;
+        this.lazy = !!options.lazy; // computed默认不取值
 
         // render去VM上取值，再渲染，所以取名getter
         // this.getter = exprOrFn;
         this.user = !!options.user;
         if (typeof exprOrFn === 'string') {
-            this.getter = function() {
+            this.getter = function () {
                 // 'name.a.aa' => vm.name.a.a
                 let path = exprOrFn.split('.');
                 let obj = vm;
-                let result = path.reduce(function(parent, current){
+                let result = path.reduce(function (parent, current) {
                     return parent[current];
                 }, obj);
-                return result; 
+                return result;
                 // 在用户watch中，没有在视图中使用这个属性，所以通过return 这个属性的方式，触发属性的get，从而让属性搜集当前这个用户watcher
                 // 同时这里返回当前最新的属性值，在watch回调中当做newValue和oldValue传递过去
             }
@@ -31,7 +37,7 @@ class Watcher{
         }
         this.deps = [];
         this.depsId = new Set(); // 去重dep
-        this.value = this.get(); // 默认第一次取当前值，当属性变化时，run方法里面再取最新值和这里的值作为老值，作为用户watcher的回调函数的值
+        this.value = this.lazy ? true : this.get(); // 默认第一次取当前值，当属性变化时，run方法里面再取最新值和这里的值作为老值，作为用户watcher的回调函数的值
     }
     get() {
         // 每个属性可能在多个页面中使用，对应多个watcher，

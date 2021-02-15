@@ -1,9 +1,13 @@
-import { observe } from "./observer";
+import {
+    observe
+} from "./observer";
 import Watcher from "./observer/watcher";
-import { isFunction } from "./util";
+import {
+    isFunction
+} from "./util";
 
 export function stateMixin(Vue) {
-    Vue.prototype.$watch = function (key, handler, options={}) {
+    Vue.prototype.$watch = function (key, handler, options = {}) {
         options.user = true; // 这是一个用户user
         let watcher = new Watcher(this, key, handler, options); // 把Watcher类改造一下，exprOrFn适合函数和表达式的情况
         if (options.immediate) {
@@ -20,12 +24,39 @@ export function initState(vm) {
     if (opts.data) {
         initData(vm)
     }
-    // if (opts.computed) {
-    //     initComputed()
-    // }
+    if (opts.computed) {
+        initComputed(vm, opts.computed)
+    }
     if (opts.watch) {
         initWatch(vm, opts.watch)
     }
+}
+
+function initComputed(vm, computed) {
+    for (const key in computed) {
+        if (Object.hasOwnProperty.call(computed, key)) {
+            const userDef = computed[key];
+            // 用户定义的可能是函数，也可能是对象（包含get和set）
+            let getter = typeof userDef === 'function' ? userDef : userDef.get;
+            // new Watcher(vm, getter, () => {}, {
+            //     lazy: true
+            // }); // computed默认不取值
+            defineComputed(vm, key, userDef);
+        }
+    }
+}
+
+function defineComputed(vm, key, userDef) {
+    // 把computed的新属性代理到vm上
+    let sharedProperty = {};
+    if (typeof userDef === 'function') {
+        sharedProperty.get = userDef;
+    } else {
+        sharedProperty.get = userDef.get;
+        sharedProperty.set = userDef.set;
+    }
+    // computed属性就是用defineProperty把新属性代理到vm上
+    Object.defineProperty(vm, key, sharedProperty);
 }
 
 function initWatch(vm, watch) { // watch是一个对象，用forin遍历
@@ -43,7 +74,7 @@ function initWatch(vm, watch) { // watch是一个对象，用forin遍历
             }
         }
     }
-    
+
 }
 
 function createWatch(vm, key, handler) {
@@ -65,7 +96,7 @@ function initData(vm) {
 }
 
 // 代理  vm._data.name => vm.name   
-function proxy(vm, source, key){
+function proxy(vm, source, key) {
     Object.defineProperty(vm, key, {
         get() {
             return vm[source][key]
