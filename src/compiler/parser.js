@@ -8,9 +8,9 @@ const startTagClose = /^\s*(\/?)>/; //     />   <div/>
 const defaultTagRE = /\{\{((?:.|\r?\n)+?)\}\}/g; // {{aaaaa}}
 
 // 在模板编译中，把html =>  词法解析（vue2中用的正则） => （开始标签 ， 结束标签，属性，文本） => ast语法树（用的栈型结构）
-let root = null;
-let stack = [];
 function parserHTML(html) {
+    let root = null; // 每次编译的时候，是一个新的root节点  // 每个组件一个root
+    let stack = [];
     function createAstElement(tagName, attrs) {
         return {
             tag: tagName,

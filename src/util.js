@@ -14,14 +14,15 @@ function flushCallbacks() {
     callbacks.forEach(cb => cb());
     waiting = false;
 }
+
 function timer(flushCallbacks) {
     let timerFn = () => {};
-    if(Promise) {
+    if (Promise) {
         // 微任务
-        timerFn = ()=> {
+        timerFn = () => {
             Promise.resolve().then(flushCallbacks);
         }
-    } else if (MutationObserver){
+    } else if (MutationObserver) {
         // 微任务
         let textNode = document.createTextNode(1);
         let observe = new MutationObserver(flushCallbacks);
@@ -46,7 +47,7 @@ function timer(flushCallbacks) {
     waiting = false;
 }
 
-export function nextTick(cb) { 
+export function nextTick(cb) {
     // nextTick 统一了vue内部的异步更新和用户调用的的异步
     // 多次调用nextTick，也执行一次 - 节流
     callbacks.push(cb);
@@ -87,6 +88,18 @@ liftCycleHooks.forEach(hook => {
     strats[hook] = mergeHook;
 });
 
+strats.components = function (parentVal, childVal) {
+    // components的合并策略
+    // 用继承的方式，先找自己上有没有这个组件，在到原型链上找
+    let options = Object.create(parentVal);
+    if (childVal) {
+        for (const key in childVal) {
+            options[key] = childVal[key];
+        }
+    }
+    return options;
+}
+
 export function mergeOptions(parent, child) {
     const options = {};
     for (const key in parent) {
@@ -118,9 +131,25 @@ export function mergeOptions(parent, child) {
                 }
             } else {
                 // 如果是普通值，则直接替换
-                options[key] = childVal;
+                options[key] = childVal || parentVal;
             }
         }
     }
     return options;
+}
+
+export function isReservedTag(str) {
+    let reservedObj = {
+        'a': true,
+        'div': true,
+        'p': true,
+        'span': true,
+        'i': true,
+        'button': true,
+        'input': true,
+        'ul': true,
+        'ol': true,
+        'li': true,
+    }
+    return !!reservedObj[str];
 }

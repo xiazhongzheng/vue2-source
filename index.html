@@ -11,30 +11,54 @@
 <!-- firstName是在计算属性中使用的，所以firstName搜集了计算属性的watcher，也没有搜集渲染watcher -->
 <!-- 所以应该同时搜集计算属性的watcher和渲染watcher -->
 
+<!-- 
+    组件
+    1.给组件创建一个构造函数, 基于Vue
+    2.开始生成虚拟节点， 对组件进行特殊处理 data.hook = { init () {}}
+    3.生成dom元素， 如果当前虚拟节点少有hook.init属性，说明是组建
+    4.对组件进行 new 组件().$mount()  => vm.$el
+    5.将组件的$el 插入到父容器中 (父组件)
+ -->
+
 <body>
     <div id="app" a=1 style="color: red;font-size: 12px;">
-        <span>hello{{name}}world</span>{{name}}{{name}}--{{arr}}--{{obj}}--{{fullName}}--{{fullName}}
+        <my-button></my-button>
+        {{lastName}}
     </div>
     <script src="./dist/vue.js"></script>
     <script>
-        Vue.mixin({
-            beforeCreate() {
-                console.log('before create1')
-            }
-        })
-        Vue.mixin({
-            beforeCreate() {
-                console.log('before create2')
-            }
-        })
+        Vue.component('my-button', {
+            template: '<button>hello</button>'
+        });
+        // Vue.mixin({
+        //     beforeCreate() {
+        //         console.log('before create1')
+        //     }
+        // })
+        // Vue.mixin({
+        //     beforeCreate() {
+        //         console.log('before create2')
+        //     }
+        // })
         let vm = new Vue({
             el: '#app',
+            components: {
+                'my-button': {
+                    template: '<button>world</button>',
+                    beforeCreate() {
+                        console.log('beforeCreate', 'child')
+                    },
+                    mounted() {
+                        console.log('mounted', 'child')
+                    },
+                }
+            },
             beforeCreate() {
                 console.log('beforeCreate', 'parent')
             },
-            created() {
-                console.log('created', 'parent')
-            },
+            // created() {
+            //     console.log('created', 'parent')
+            // },
             mounted() {
                 console.log('mounted', 'parent')
             },
@@ -51,7 +75,7 @@
                 fullName: {
                     get() {
                         let fullName = this.firstName + '' + this.lastName;
-                        console.log('get', fullName);
+                        // console.log('get', fullName);
                         return fullName;
                     },
                     set(newValue) {
@@ -59,24 +83,24 @@
                     }
                 }
             },
-            watch: {
-                'obj.a.a'(newV, oldV) {
-                    console.log(newV, oldV);
-                },
-                name: [
-                    function (newV, oldV) {
-                        console.log(newV, oldV);
-                    },
-                    function (a, b) {
-                        console.log(a, b);
-                    }
-                ]
-            }
+            // watch: {
+            //     'obj.a.a'(newV, oldV) {
+            //         console.log(newV, oldV);
+            //     },
+            //     name: [
+            //         function (newV, oldV) {
+            //             console.log(newV, oldV);
+            //         },
+            //         function (a, b) {
+            //             console.log(a, b);
+            //         }
+            //     ]
+            // }
         })
         // vm.$watch('name', function (newV, oldV) {
         //     console.log(newV, oldV);
         // },{})
-        console.log('Vue.options', Vue.options)
+        // console.log('Vue.options', Vue.options)
         setTimeout(() => {
             // vm.name = 'xiaoqing1';
             // vm.name = 'xiaoqing2';
@@ -90,7 +114,7 @@
             // })
 
             vm.lastName = 'lan';
-            console.log(vm.fullName)
+            // console.log(vm.fullName)
         }, 1000);
         // console.log(vm.arr[0].name)
     </script>

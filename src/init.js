@@ -37,9 +37,10 @@ export function initMixin(Vue) {
             let template = options.template;
             if (!template && el) {
                 template = el.outerHTML;
-                let render = compileToFunction(template);
-                options.render = render;
             }
+            // 没有el，也转换成render，比如组件
+            let render = compileToFunction(template);
+            options.render = render;
         }
 
         mountComponent(vm, el);
