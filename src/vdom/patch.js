@@ -10,8 +10,74 @@ export function patch(oldVnode, vnode) {
         parentEle.removeChild(oldVnode);
         // 返回新的$el
         return ele
+    } else {
+        console.log(oldVnode, vnode);
+        // diff 
+        if (oldVnode.tag !== vnode.tag) {
+            // 标签不一样直接替换
+            return oldVnode.el.parentNode.replaceChild(createEle(vnode), oldVnode.el, );
+        }
+        // 标签一样
+        let el = vnode.el = oldVnode.el; // 复用el
+        if (vnode.tag === undefined) {
+            // 都是文本
+            if (vnode.text !== oldVnode.text) {
+                el.textContent = vnode.text;
+            }
+            return;
+        }
+        // 标签一样， 复用标签，更新属性
+        patchProps(vnode, oldVnode.data);
+
+        // 比较儿子
+        let newChildren = vnode.children || [];
+        let oldChildren = oldVnode.children || [];
+        // 新老都有
+        if (newChildren.length && oldChildren.length) {
+
+        } else if (oldChildren.length) {
+            // 新没有， 老有
+            el.innerHTML = ``;
+        } else {
+            // 老没有，新有
+            for (let i = 0; i < newChildren.length; i++) {
+                el.appendChild(createEle(newChildren[i]));
+            }
+        }
     }
 }
+
+// 初始渲染属性，或者更新比较属性
+function patchProps(vnode, oldProps = {}) {
+    let newProps = vnode.data || {};
+    let el = vnode.el;
+    let newStyle = newProps.style || {};
+    let oldStyle = oldProps.style || {};
+
+    // 把新属性中没有的老的属性，删除
+    for (const key in oldProps) {
+        if (!newProps[key]) {
+            el.removeAttribute(key)
+        }
+    }
+    for (const key in oldStyle) {
+        if (!newStyle[key]) {
+            el.style[key] = ''
+        }
+    }
+
+    // 新的属性放到el上
+    for (const key in newProps) {
+        if (key == 'style') {
+            for (const styleName in newProps[key]) {
+                el.style[styleName] = newProps[key][styleName];
+            }
+        } else {
+            el.setAttribute(key, newProps[key]);
+        }
+    }
+}
+
 function createComponent(vnode) {
     let i = vnode.data;
     // vnode.data.hook.init执行
@@ -19,12 +85,12 @@ function createComponent(vnode) {
     if ((i = i.hook) && (i = i.init)) {
         i(vnode);
     }
-    if(vnode.componentInstance) {
+    if (vnode.componentInstance) {
         return true;
     }
 
 }
-function createEle(vnode) {
+export function createEle(vnode) {
     let {
         tag,
         data,
@@ -39,6 +105,7 @@ function createEle(vnode) {
         }
         // 元素
         vnode.el = document.createElement(tag);
+        patchProps(vnode);
         children.forEach(child => {
             vnode.el.appendChild(createEle(child))
         })
