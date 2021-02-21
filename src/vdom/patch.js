@@ -112,7 +112,7 @@ function patchChildren(el, oldChildren, newChildren) {
                 el.insertBefore(createEle(newStartVnode), oldStartVnode.el);
             } else {
                 let moveVnode = oldChildren[moveIndex];
-                oldChildren[moveIndex] = null; // 节点被移动走了，要用null占位，否则key 和 index的映射表就会失效了。
+                oldChildren[moveIndex] = null; // 节点被移动走了，要用null占位，下次遍历到这里的时候，就会跳过这里
                 el.insertBefore(moveVnode.el, oldStartVnode.el);
                 patch(moveVnode, oldStartVnode);
             }
